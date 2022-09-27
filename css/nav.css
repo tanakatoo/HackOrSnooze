@@ -21,3 +21,13 @@ nav {
   margin-left: auto;
   text-align: right;
 }
+
+.nav-left {
+  margin-right: auto;
+  text-align: left;
+}
+
+.nav-left::before{
+  content: "|";
+  margin-left: 10px;
+}
