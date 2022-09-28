@@ -27,7 +27,10 @@ nav {
   text-align: left;
 }
 
-.nav-left::before{
+#nav-submit::before,
+#nav-favorites::before,
+#nav-my-stories::before{
   content: "|";
-  margin-left: 10px;
+  margin-left: 3px;
+  margin-right: 8px;
 }

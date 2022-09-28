@@ -39,6 +39,8 @@
   </div>
   <div class="nav-left">
     <a class="nav-link" href="#" id="nav-submit">submit</a>
+    <a class="nav-link" href="#" id="nav-favorites">favorites</a>
+    <a class="nav-link" href="#" id="nav-my-stories">my stories</a>
   </div>
   <div class="nav-right">
     <a class="nav-link" href="#" id="nav-login">login/signup</a>
@@ -49,6 +51,26 @@
 
 <!-- area for stories (all stories, user stories, favorites) -->
 <section class="stories-container container">
+
+  <!-- Add New Story Form -->
+  <form id="newStory" method="POST">
+    <div class="login-input">
+      <label for="submit-author">author</label>
+      <input id="submit-author">
+    </div>
+    <div class="login-input">
+      <label for="submit-title">title</label>
+      <input id="submit-title">
+    </div>
+    <div class="login-input">
+      <label for="submit-url">url</label>
+      <input id="submit-url" type="url">
+    </div>
+    <button type="submit">submit</button>
+    <hr>
+  </form>
+
+  
 
   <!-- loading message (removed by JS after stories loaded) -->
   <div id="stories-loading-msg">Loading&hellip;</div>
@@ -62,7 +84,7 @@
 <section class="account-forms-container container">
 
   <!-- Login form -->
-  <form action="#" id="login-form" class="account-form hidden" method="post">
+  <form id="login-form" class="account-form hidden" method="post">
     <h4>Login</h4>
     <div class="login-input">
       <label for="login-username">username</label>
@@ -76,9 +98,10 @@
     <hr>
   </form>
 
+
+
   <!-- Signup form -->
   <form
-      action="#"
       id="signup-form"
       class="account-form hidden"
       method="post">
@@ -99,10 +122,7 @@
   </form>
 </section>
 
-<!-- Add New Story Form -->
-<form action="#" id="newStory" method="POST">
 
-</form>
 
 <!-- Library JS & our JS -->
 <script src="https://unpkg.com/jquery"></script>

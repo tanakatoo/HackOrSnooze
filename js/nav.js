@@ -35,4 +35,53 @@ function updateNavOnLogin() {
   $navUserProfile.text(`${currentUser.username}`).show();
 }
 
-$body.on("click","#nav-submit", )
+// Show new story when click on submit
+// Only show if user is logged in, otherwise, show user login form
+
+function updateNavOnSubmit(){
+  console.debug("updateNavOnSubmit");
+  hidePageComponents();
+  if (currentUser) {
+    $submitForm.show();
+    $allStoriesList.show();
+  } else {
+    $loginForm.show();
+    $signupForm.show();
+  }
+}
+
+$body.on("click", "#nav-submit", updateNavOnSubmit)
+
+// Show user favorited stories
+// Only show if user is logged in, otherwise, show user login form
+
+function displayUserFavorites(){
+  console.debug("displayUserFavorites");
+  hidePageComponents();
+  if (currentUser) {
+    displayFavorites();
+  } else {
+    $loginForm.show();
+    $signupForm.show();
+  }
+  //find only user favorites and then 
+  
+}
+
+$body.on("click", "#nav-favorites", displayUserFavorites)
+
+// Show user generated stories
+// Only show if user is logged in, otherwise, show user login form
+
+function displayOwnStories(){
+  console.debug("displayOwnStories");
+  hidePageComponents();
+  if (currentUser) {
+    displayOwnStories();
+  } else {
+    $loginForm.show();
+    $signupForm.show();
+  }
+}
+
+$body.on("click", "#nav-my-stories", displayOwnStories)

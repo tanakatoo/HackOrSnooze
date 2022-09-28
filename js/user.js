@@ -3,6 +3,10 @@
 // global to hold the User instance of the currently-logged-in user
 let currentUser;
 
+//empty star <i class="fa-regular fa-star"></i> &#9734;
+//filled in star <i class="fa-solid fa-star"></i> &#9733;
+//garbage bin <i class='fa fa-trash-o'></i>
+
 /******************************************************************************
  * User login/signup/login
  */
@@ -114,3 +118,6 @@ function updateUIOnUserLogin() {
 
   updateNavOnLogin();
 }
+
+//favourite a story if the user clicks the empty star
+//unfavorite a story if user user clicks the filled star

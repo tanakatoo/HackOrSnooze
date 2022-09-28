@@ -1,5 +1,4 @@
 "use strict";
-
 // So we don't have to keep re-finding things on page, find DOM elements once:
 
 const $body = $("body");
@@ -9,6 +8,7 @@ const $allStoriesList = $("#all-stories-list");
 
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
+const $submitForm = $("#newStory");
 
 const $navLogin = $("#nav-login");
 const $navUserProfile = $("#nav-user-profile");
@@ -21,6 +21,7 @@ const $navLogOut = $("#nav-logout");
 
 function hidePageComponents() {
   const components = [
+    $submitForm,
     $allStoriesList,
     $loginForm,
     $signupForm,
@@ -37,8 +38,44 @@ async function start() {
   await checkForRememberedUser();
   await getAndShowStoriesOnStart();
 
+  //put click event on the stories to see if a favorite has been clicked
+  $allStoriesList.on("click", ".star", clickStar)
+
   // if we got a logged-in user
   if (currentUser) updateUIOnUserLogin();
+}
+
+//if a star has been clicked, add it to favorite if it was an empty star
+//and fill the star
+//delete it from favorite if a filled star was clicked
+async function clickStar(evt) {
+  const storyId = $(this).parent().attr('id')
+
+  if ($(this).children('i').hasClass('fas')) {
+    //if star is filled
+    console.log('filled star')
+    try {
+      await User.deleteFavourite(currentUser.loginToken, currentUser.username, storyId)
+      //empty star
+      $(this).children('i').removeClass('fas')
+      $(this).children('i').addClass('far')
+    } catch (err) {
+      console.log('unfavoriting failed')
+      console.log(err)
+    }
+  } else if ($(this).children('i').hasClass('far')) {
+    //if star is empty
+    console.log('empty star')
+    try {
+      await User.addFavourite(currentUser.loginToken, currentUser.username, storyId)
+      //fill star
+      $(this).children('i').removeClass('far')
+      $(this).children('i').addClass('fas')
+    } catch (err) {
+      console.log('favoriting failed')
+      console.log(err)
+    }
+  }
 }
 
 // Once the DOM is entirely loaded, begin the app

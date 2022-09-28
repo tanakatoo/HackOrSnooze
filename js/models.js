@@ -73,13 +73,16 @@ class StoryList {
    * Returns the new Story instance
    */
 
-  async addStory(user, newStory) {
+  static async addStory(user, newStory) {
     // UNIMPLEMENTED: complete this function!
+
     const response = await axios({
       url: `${BASE_URL}/stories`,
       method: "POST",
-      token: user.loginToken,
-      story: newStory
+      data: {
+        token: user.loginToken,
+        story: newStory
+      }
     });
     console.debug(response)
     return response
@@ -98,13 +101,13 @@ class User {
    */
 
   constructor({
-                username,
-                name,
-                createdAt,
-                favorites = [],
-                ownStories = []
-              },
-              token) {
+    username,
+    name,
+    createdAt,
+    favorites = [],
+    ownStories = []
+  },
+    token) {
     this.username = username;
     this.name = name;
     this.createdAt = createdAt;
@@ -198,6 +201,44 @@ class User {
       );
     } catch (err) {
       console.error("loginViaStoredCredentials failed", err);
+      return null;
+    }
+  }
+
+  //If user is logged in, they can favourite a story use POST at
+  //https://hack-or-snooze-v3.herokuapp.com/users/username/favorites/storyId
+
+  static async addFavourite(token, username, storyId) {
+    try {
+      const response = await axios({
+        url: `${BASE_URL}/users/${username}/favorites/${storyId}`,
+        method: "POST",
+        data: { token: token },
+      });
+
+      //set global variable currentUser to the new user variable
+      currentUser = response.data.user
+      return response.data;
+    } catch (err) {
+      console.error("addFavourite failed", err)
+      return null;
+    }
+  }
+
+  //If user is logged in, they can favourite a story use POST at
+  //https://hack-or-snooze-v3.herokuapp.com/users/username/favorites/storyId
+
+  static async deleteFavourite(token, username, storyId) {
+    try {
+      const response = await axios({
+        url: `${BASE_URL}/users/${username}/favorites/${storyId}`,
+        method: "DELETE",
+        data: { token: token },
+      });
+      currentUser = response.data.user
+      return response.data;
+    } catch (err) {
+      console.error("deleteFavourite failed", err)
       return null;
     }
   }
