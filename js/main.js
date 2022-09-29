@@ -40,37 +40,52 @@ async function start() {
 
   //put click event on the stories to see if a favorite has been clicked
   $allStoriesList.on("click", ".star", clickStar)
+  $allStoriesList.on('click', '.delete', removeStory)
 
   // if we got a logged-in user
   if (currentUser) updateUIOnUserLogin();
 }
 
-//if a star has been clicked, add it to favorite if it was an empty star
-//and fill the star
-//delete it from favorite if a filled star was clicked
+//if user clicks the garbage bin, then it should remove the story from the db
+async function removeStory() {
+  const storyId = $(this).parent().attr('id')
+  const response = await Story.deleteStory(currentUser.loginToken, storyId)
+  if (response.status == 200) {
+    await updateCurrentUser();
+    await displayMyStories()
+  }
+
+}
+
+//if empty star was clicked then fill the star and call api to add it to the db
+//delete it from favorite if a filled star was clicked and call api to remove it from the db
+//update the dom only if the api call was successful
 async function clickStar(evt) {
   const storyId = $(this).parent().attr('id')
 
   if ($(this).children('i').hasClass('fas')) {
     //if star is filled
-    console.log('filled star')
     try {
-      await User.deleteFavourite(currentUser.loginToken, currentUser.username, storyId)
-      //empty star
-      $(this).children('i').removeClass('fas')
-      $(this).children('i').addClass('far')
+      const res = await User.deleteFavourite(currentUser.loginToken, currentUser.username, storyId)
+
+      if (res.status == 200) {
+        //empty star
+        $(this).children('i').removeClass('fas')
+        $(this).children('i').addClass('far')
+      }
     } catch (err) {
       console.log('unfavoriting failed')
       console.log(err)
     }
   } else if ($(this).children('i').hasClass('far')) {
     //if star is empty
-    console.log('empty star')
     try {
-      await User.addFavourite(currentUser.loginToken, currentUser.username, storyId)
-      //fill star
-      $(this).children('i').removeClass('far')
-      $(this).children('i').addClass('fas')
+      const res = await User.addFavourite(currentUser.loginToken, currentUser.username, storyId)
+      if (res.status == 200) {
+        //fill star
+        $(this).children('i').removeClass('far')
+        $(this).children('i').addClass('fas')
+      }
     } catch (err) {
       console.log('favoriting failed')
       console.log(err)

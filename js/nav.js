@@ -6,9 +6,14 @@
 
 /** Show main list of all stories when click site name */
 
-function navAllStories(evt) {
+async function navAllStories(evt) {
   console.debug("navAllStories", evt);
   hidePageComponents();
+  if (currentUser) {
+    //make sure the user object is the most updated
+    //so that favorited is displayed properly
+    await updateCurrentUser();
+  }
   putStoriesOnPage();
 }
 
@@ -38,12 +43,13 @@ function updateNavOnLogin() {
 // Show new story when click on submit
 // Only show if user is logged in, otherwise, show user login form
 
-function updateNavOnSubmit(){
+function updateNavOnSubmit() {
   console.debug("updateNavOnSubmit");
   hidePageComponents();
   if (currentUser) {
     $submitForm.show();
-    $allStoriesList.show();
+    putStoriesOnPage();
+    //$allStoriesList.show();
   } else {
     $loginForm.show();
     $signupForm.show();
@@ -55,17 +61,19 @@ $body.on("click", "#nav-submit", updateNavOnSubmit)
 // Show user favorited stories
 // Only show if user is logged in, otherwise, show user login form
 
-function displayUserFavorites(){
+async function displayUserFavorites() {
   console.debug("displayUserFavorites");
   hidePageComponents();
   if (currentUser) {
+    //update the user to get most recent data
+    await updateCurrentUser();
     displayFavorites();
   } else {
     $loginForm.show();
     $signupForm.show();
   }
   //find only user favorites and then 
-  
+
 }
 
 $body.on("click", "#nav-favorites", displayUserFavorites)
@@ -73,11 +81,13 @@ $body.on("click", "#nav-favorites", displayUserFavorites)
 // Show user generated stories
 // Only show if user is logged in, otherwise, show user login form
 
-function displayOwnStories(){
+async function displayOwnStories() {
   console.debug("displayOwnStories");
   hidePageComponents();
   if (currentUser) {
-    displayOwnStories();
+    //update the user to get most recent data
+    await updateCurrentUser();
+    displayMyStories();
   } else {
     $loginForm.show();
     $signupForm.show();

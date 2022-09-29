@@ -24,8 +24,32 @@ class Story {
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+    const deleteBeginning = this.url.slice(this.url.indexOf('//') + 2)
+    const deleteEnd = deleteBeginning.indexOf('/')
+    let hostName
+    if (deleteEnd !== -1) {
+      hostName = deleteBeginning.slice(0, deleteEnd)
+    } else {
+      hostName = "hostname.com"
+    }
+    return hostName;
+  }
+
+  //deletes story
+
+  static async deleteStory(token, storyId) {
+    try {
+      const response = await axios({
+        url: `${BASE_URL}/stories/${storyId}`,
+        method: "DELETE",
+        data: {
+          token: token
+        }
+      })
+      return response
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
@@ -74,7 +98,6 @@ class StoryList {
    */
 
   static async addStory(user, newStory) {
-    // UNIMPLEMENTED: complete this function!
 
     const response = await axios({
       url: `${BASE_URL}/stories`,
@@ -118,6 +141,34 @@ class User {
 
     // store the login token on the user so it's easy to find for API calls.
     this.loginToken = token;
+  }
+
+  //get updated data from the database about the user
+
+  static async getUserData(token, username) {
+    try {
+      const response = await axios({
+        url: `${BASE_URL}/users/${username}`,
+        method: "GET",
+        params: { token },
+      });
+
+      let { user } = response.data;
+
+      return new User(
+        {
+          username: user.username,
+          name: user.name,
+          createdAt: user.createdAt,
+          favorites: user.favorites,
+          ownStories: user.stories
+        },
+        token
+      );
+    } catch (err) {
+      console.error("loginViaStoredCredentials failed", err);
+      return null;
+    }
   }
 
   /** Register new user in API, make User instance & return it.
@@ -205,8 +256,7 @@ class User {
     }
   }
 
-  //If user is logged in, they can favourite a story use POST at
-  //https://hack-or-snooze-v3.herokuapp.com/users/username/favorites/storyId
+  //If user is logged in, they can favourite a story
 
   static async addFavourite(token, username, storyId) {
     try {
@@ -216,17 +266,14 @@ class User {
         data: { token: token },
       });
 
-      //set global variable currentUser to the new user variable
-      currentUser = response.data.user
-      return response.data;
+      return response;
     } catch (err) {
       console.error("addFavourite failed", err)
       return null;
     }
   }
 
-  //If user is logged in, they can favourite a story use POST at
-  //https://hack-or-snooze-v3.herokuapp.com/users/username/favorites/storyId
+  //If user is logged in, they can unfavourite a story
 
   static async deleteFavourite(token, username, storyId) {
     try {
@@ -235,8 +282,8 @@ class User {
         method: "DELETE",
         data: { token: token },
       });
-      currentUser = response.data.user
-      return response.data;
+
+      return response;
     } catch (err) {
       console.error("deleteFavourite failed", err)
       return null;

@@ -8,25 +8,24 @@ let storyList;
 async function getAndShowStoriesOnStart() {
   storyList = await StoryList.getStories();
   $storiesLoadingMsg.remove();
-
   putStoriesOnPage();
 }
 
 /**
  * A render method to render HTML for an individual Story instance
  * - story: an instance of Story
- *
+ * - filledStar: boolean for whether to display empty star or filled star
+ * - ownStory: boolean for whether the user clicked on 'my stories' in the nav, if so then show garbage bin
  * Returns the markup for the story.
  */
 
-function generateStoryMarkup(story, filledStar) {
+function generateStoryMarkup(story, filledStar, ownStory = false) {
 
   const hostName = story.getHostName();
   return $(`
       <li id="${story.storyId}">
-        <span class="star">  
-          <i class="${filledStar ? 'fa-star fas' : 'far fa-star'}"></i>
-        </span>
+        ${ownStory ? '<span class="delete"><i class="fas fa-trash-alt"></i></span>' : ''}
+        ${currentUser ? `<span class="star"><i class="${filledStar ? 'fa-star fas' : 'far fa-star'}"></i></span>` : ''}
         <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
@@ -37,35 +36,39 @@ function generateStoryMarkup(story, filledStar) {
     `);
 }
 
-/** Gets list of stories from server, generates their HTML, and puts on page. */
+/** Gets list of stories and most current user from server, generates their HTML, and puts on page. */
 
-function putStoriesOnPage() {
+async function putStoriesOnPage() {
   console.debug("putStoriesOnPage");
 
   $allStoriesList.empty();
+  //get updated stories list in case the user deleted or added something
+  storyList = await StoryList.getStories();
 
-  // loop through all of our stories and generate HTML for them
-  let filledStar = false
-  for (let story of storyList.stories) {
-    //if user is logged in then display favorited
-    if (currentUser) {
+  //??????????????????
+  //check the user first and repeat for loop or
+  //check for the user each time in the for loop
+  //????????????????????
 
+  //if current user is logged in then check to see if story is favorited
+  if (currentUser) {
+    for (let story of storyList.stories) {
       //loop through to see if the user has this story favorited
-      for (let favorited of currentUser.favorites) {
-        if (story.storyId == favorited.storyId) {
-          filledStar = true
-        }
-      }
+      let filledStar = isItFavorited(story)
+      const $story = generateStoryMarkup(story, filledStar);
+      $allStoriesList.append($story);
     }
-    const $story = generateStoryMarkup(story, filledStar);
-    $allStoriesList.append($story);
-    filledStar = false
+  } else {
+    for (let story of storyList.stories) {
+      //loop through to see if the user has this story favorited
+      const $story = generateStoryMarkup(story, false);
+      $allStoriesList.append($story);
+    }
   }
-
   $allStoriesList.show();
 }
 
-//
+
 $submitForm.on("submit", addStory);
 
 // Gets new story and adds the new story on the page
@@ -77,21 +80,31 @@ async function addStory(evt) {
     title: $("#submit-title").val(),
     url: $("#submit-url").val()
   }
-  await StoryList.addStory(currentUser, newStory)
-  getAndShowStoriesOnStart()
+  const res = await StoryList.addStory(currentUser, newStory)
+  if (res.status == 201) {
+    $("#submit-author").val("")
+    $("#submit-title").val("")
+    $("#submit-url").val("")
+    getAndShowStoriesOnStart()
+  }
 }
 
 //display the user favorited stories only
-function displayFavorites() {
+async function displayFavorites() {
   console.debug("displayFavorites");
-  let favorites = currentUser.favorites
+
   $allStoriesList.empty();
+
+  let favorites = currentUser.favorites
   // loop through all of our stories and generate HTML for them
   if (favorites.length) {
+
     for (let story of favorites) {
-      const $story = generateStoryMarkup(new Story(story), true);
+      const $story = generateStoryMarkup(story, true);
       $allStoriesList.append($story);
+
     }
+
   } else {
     $allStoriesList.append("<li style='list-style: none'>No favorites yet!</li>");
   }
@@ -99,15 +112,37 @@ function displayFavorites() {
 
 }
 
-function displayOwnStories() {
-  console.debug("displayOwnStories");
-  let ownStories = currentUser.ownStories
-  $allStoriesList.empty();
-  // loop through all of our stories and generate HTML for them
-  for (let story of ownStories) {
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.append($story);
-  }
+//if the my stories in the nav was clicked, then display only the user generated stories
+async function displayMyStories() {
+  console.debug("displayMyStories");
 
+  let ownStories = currentUser.ownStories
+
+  $allStoriesList.empty();
+  // loop through all user stories and generate HTML for them
+  if (ownStories.length) {
+
+    for (let story of ownStories) {
+      const filledStar = isItFavorited(story)
+      const $story = generateStoryMarkup(story, filledStar, true);
+      $allStoriesList.append($story);
+
+    }
+  } else {
+    $allStoriesList.append("<li style='list-style: none'>No stories created yet!</li>");
+  }
   $allStoriesList.show();
 }
+
+//gets favorites from user object and loops through it to see if 
+//story is on the list. If it is then return true otherwise return false
+function isItFavorited(story) {
+  let favorites = currentUser.favorites
+  for (let favorite of favorites) {
+    if (story.storyId == favorite.storyId) {
+      return true
+    }
+  }
+  return false
+}
+

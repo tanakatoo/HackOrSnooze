@@ -119,5 +119,10 @@ function updateUIOnUserLogin() {
   updateNavOnLogin();
 }
 
-//favourite a story if the user clicks the empty star
-//unfavorite a story if user user clicks the filled star
+//Update the current user in memory so that when the user
+//changes their profile by adding or deleting favorites or
+//adding or deleting their stories it will be reflected on the dom
+async function updateCurrentUser() {
+  const res = await User.getUserData(currentUser.loginToken, currentUser.username)
+  currentUser = res
+}
